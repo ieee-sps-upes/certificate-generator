@@ -1,0 +1,22 @@
+from database import get_db
+def add_user():
+    db = get_db()
+    
+    user = {
+        "name": "om agarwal",
+        "email": "om.agarwal16805@gmail.com"
+    }
+    
+    # Check if exists to avoid duplicates
+    existing = db["ieee_participants"].find_one({"email": user["email"]})
+    if existing:
+        print("User already exists. Updating name just in case.")
+        db["ieee_participants"].update_one(
+            {"email": user["email"]}, 
+            {"$set": {"name": user["name"]}}
+        )
+    else:
+        result = db["ieee_participants"].insert_one(user)
+        print(f"Inserted user with ID: {result.inserted_id}")
+if __name__ == "__main__":
+    add_user()
