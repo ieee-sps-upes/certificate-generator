@@ -34,20 +34,24 @@ def generate_certificate_image(participant_name):
 
     # Load fonts
     try:
-        font_large = ImageFont.truetype("newfont.ttf", 60)
+        # Elegant script font for participant name
+        font_large = ImageFont.truetype("GreatVibes-Regular.ttf", 90)
     except:
-        font_large = ImageFont.load_default()
+        try:
+            font_large = ImageFont.truetype("newfont.ttf", 60)
+        except:
+            font_large = ImageFont.load_default()
 
     # ---- Certificate Content ----
 
-    # Participant Name (CENTERED)
+    # Participant Name (CENTERED) — Title Case for script font
     draw_centered_text(
         draw,
-        participant_name.upper(),
+        participant_name.title(),
         y=300,
         font=font_large,
         image_width=img_width,
-        fill=(0, 0, 0)
+        fill=(10, 36, 99)  # Deep IEEE navy blue — matches certificate style
     )
 
     img_io = BytesIO()
