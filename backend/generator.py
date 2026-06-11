@@ -10,7 +10,7 @@ def draw_centered_text(draw, text, y, font, image_width, fill=(0, 0, 0)):
     text_width = bbox[2] - bbox[0]
 
     x = (image_width - text_width) // 2
-    y = 770
+    # y is passed in as a parameter — do NOT hardcode it here
     draw.text((x, y), text, fill=fill, font=font)
 
 
@@ -35,7 +35,7 @@ def generate_certificate_image(participant_name):
     # Load fonts
     try:
         # Elegant script font for participant name
-        font_large = ImageFont.truetype("GreatVibes-Regular.ttf", 90)
+        font_large = ImageFont.truetype("GreatVibes-Regular.ttf", 105)
     except:
         try:
             font_large = ImageFont.truetype("newfont.ttf", 60)
@@ -44,11 +44,15 @@ def generate_certificate_image(participant_name):
 
     # ---- Certificate Content ----
 
-    # Participant Name (CENTERED) — Title Case for script font
+    # Always format name in Title Case regardless of what's stored in the DB
+    # e.g. "om agarwal" / "OM AGARWAL" / "oM aGaRwAL" → "Om Agarwal"
+    def title_case(name):
+        return ' '.join(word.capitalize() for word in name.split())
+
     draw_centered_text(
         draw,
-        participant_name.title(),
-        y=300,
+        title_case(participant_name),
+        y=680,  # Moved higher — tweak this number up/down to reposition
         font=font_large,
         image_width=img_width,
         fill=(10, 36, 99)  # Deep IEEE navy blue — matches certificate style

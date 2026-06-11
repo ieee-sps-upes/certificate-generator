@@ -76,6 +76,9 @@ instance/
 *.sqlite
 *.sqlite3
 
+# Generated certificates output
+backend/certi/
+
 # Temporary files
 *.tmp
 *.temp
