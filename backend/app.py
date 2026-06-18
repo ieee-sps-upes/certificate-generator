@@ -22,48 +22,90 @@ def login():
 @app.route('/api/send-otp', methods=['POST'])
 def send_otp():
     try:
-        data = request.json
-        email = data.get("email")
-        name = data.get("name")
-        
-        if not email or not name:
-            return jsonify({"error": "Both Name and Email are required"}), 400
-            
+        data   = request.json
+        email  = (data.get("email")  or "").strip()
+        name   = (data.get("name")   or "").strip()
+        sap_id = (data.get("sap_id") or "").strip()
+
+        if not name:
+            return jsonify({"error": "Name is required"}), 400
+        if sap_id and not sap_id.isdigit():
+            return jsonify({"error": "SAP ID must contain numbers only"}), 400
+
+        import re
+        def esc(s):
+            return re.escape(s)
+
         db = get_db()
-        # Lookup in ieee_participants using case-insensitive name match
-        participant = db["ieee_participants"].find_one({
-            "email": email,
-            "name": {"$regex": f"^{name}$", "$options": "i"}
-        })
-        
+        participant     = None
+        recipient_email = None
+
+        # ── RULE A: Name + Email ──────────────────────────────────────────────
+        if email:
+            participant = db["ieee_participants"].find_one({
+                "email": {"$regex": f"^{esc(email)}$", "$options": "i"},
+                "name":  {"$regex": f"^{esc(name)}$",  "$options": "i"},
+            })
+            if participant:
+                recipient_email = participant["email"]
+
+        # ── RULE B: Name + SAP ID (only for participants with no email in DB) ─
         if not participant:
-            return jsonify({"error": "No matching record found for this Name and Email"}), 404
-            
-        # Generate 6-digit OTP
+            if not sap_id:
+                return jsonify({"error": "Please check your details, user not found."}), 404
+
+            sap_match = db["ieee_participants"].find_one({
+                "sap_id": sap_id,
+                "name":   {"$regex": f"^{esc(name)}$", "$options": "i"},
+            })
+
+            if not sap_match:
+                return jsonify({"error": "Please check your details, user not found."}), 404
+
+            if sap_match.get("email"):
+                return jsonify({"error": "Please check your details, user not found."}), 400
+
+            if not email:
+                return jsonify({"error": "Please check your details, user not found."}), 400
+
+            participant     = sap_match
+            recipient_email = email
+
+
+        # ─────────────────────────────────────────────────────────────────────
+        # Common: generate & send OTP
+        # ─────────────────────────────────────────────────────────────────────
         otp = str(random.randint(100000, 999999))
-        
-        # Save OTP to DB with 10 minute expiration
+
         db["otp_store"].update_one(
-            {"email": email},
+            {"email": recipient_email},
             {"$set": {
                 "otp": otp,
-                "expires_at": int(time.time()) + 600
+                "expires_at": int(time.time()) + 600,
+                "participant_id": str(participant["_id"])  # store so generate-certificate can find participant regardless of email
             }},
             upsert=True
         )
-        
-        # Send OTP
-        success = send_otp_email(email, otp)
+
+        success = send_otp_email(recipient_email, otp)
         if success:
-            return jsonify({"message": "OTP sent successfully"}), 200
+            at_idx  = recipient_email.index("@")
+            visible = recipient_email[:2]
+            masked  = visible + ("*" * (at_idx - 2)) + recipient_email[at_idx:]
+            return jsonify({
+                "message":    "OTP sent successfully",
+                "email_hint": masked,
+                "email":      recipient_email
+            }), 200
         else:
             return jsonify({"error": "Failed to send OTP email"}), 500
-            
+
     except Exception as e:
         import traceback
         print(f"Error in send_otp: {str(e)}")
         print(traceback.format_exc())
         return jsonify({"error": str(e)}), 500
+
 
 @app.route('/api/generate-certificate', methods=['POST'])
 def generate_certificate_endpoint():
@@ -94,8 +136,13 @@ def generate_certificate_endpoint():
         if otp_record.get("expires_at", 0) < int(time.time()):
             return jsonify({"error": "OTP has expired"}), 400
 
-        # Retrieve participant name
-        participant = db["ieee_participants"].find_one({"email": email})
+        # Retrieve participant — prefer lookup by stored participant_id (handles no-email-in-DB case)
+        from bson import ObjectId
+        participant_id = otp_record.get("participant_id")
+        if participant_id:
+            participant = db["ieee_participants"].find_one({"_id": ObjectId(participant_id)})
+        else:
+            participant = db["ieee_participants"].find_one({"email": email})
         if not participant:
             return jsonify({"error": "Participant not found"}), 404
 

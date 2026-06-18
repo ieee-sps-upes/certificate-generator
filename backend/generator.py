@@ -43,9 +43,6 @@ def generate_certificate_image(participant_name):
             font_large = ImageFont.load_default()
 
     # ---- Certificate Content ----
-
-    # Always format name in Title Case regardless of what's stored in the DB
-    # e.g. "om agarwal" / "OM AGARWAL" / "oM aGaRwAL" → "Om Agarwal"
     def title_case(name):
         return ' '.join(word.capitalize() for word in name.split())
 
