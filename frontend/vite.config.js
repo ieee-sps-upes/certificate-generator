@@ -8,7 +8,7 @@ export default defineConfig({
     proxy: {
       // During dev, any request starting with /api is forwarded to Flask
       '/api': {
-        target: 'http://localhost:5001',
+        target: 'https://certificate-generator-k6ab.onrender.com',
         changeOrigin: true,
       }
     }
