@@ -1,18 +1,45 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
 
 :root {
+  /* IEEE Brand Palette */
   --ieee-blue: #00629B;
   --ieee-blue-light: #0085D1;
-  --ieee-blue-dark: #00426A;
+  --ieee-blue-dark: #002855;
+  --ieee-blue-soft: rgba(0, 98, 155, 0.08);
+  
+  /* Status Colors */
   --linkedin-blue: #0A66C2;
   --linkedin-blue-dark: #004182;
-  --text-primary: #1E293B;
-  --text-secondary: #64748B;
   --error: #EF4444;
+  --error-bg: rgba(239, 68, 68, 0.08);
   --success: #10B981;
-  --border-light: rgba(255, 255, 255, 0.3);
-  --glass-bg: rgba(255, 255, 255, 0.85);
-  --glass-border: rgba(255, 255, 255, 0.4);
+  --success-bg: rgba(16, 185, 129, 0.08);
+
+  /* Typography Colors */
+  --text-primary: #0F172A;     /* Slate 900 */
+  --text-secondary: #475569;   /* Slate 600 */
+  --text-muted: #94A3B8;       /* Slate 400 */
+
+  /* Neutral Backgrounds */
+  --bg-primary: #F8FAFC;       /* Slate 50 */
+  --bg-secondary: #FFFFFF;
+
+  /* Card and Borders */
+  --border-light: rgba(0, 98, 155, 0.08);
+  --glass-bg: #FFFFFF;         /* Solid white as in reference image */
+  --glass-border: rgba(0, 98, 155, 0.12);
+  --input-border: #E2E8F0;
+  
+  /* Shadows & Radius */
+  --radius-lg: 24px;
+  --radius-md: 14px;
+  --radius-sm: 8px;
+  --shadow-sm: 0 2px 8px rgba(0, 42, 106, 0.03);
+  --shadow-md: 0 10px 25px rgba(0, 42, 106, 0.05);
+  --shadow-lg: 0 25px 50px -12px rgba(0, 42, 106, 0.08);
+  
+  /* Transitions */
+  --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 * {
@@ -23,7 +50,12 @@
 
 body {
   font-family: 'Outfit', sans-serif;
-  background: linear-gradient(135deg, #f0f7ff 0%, #e0efff 50%, #cce4ff 100%);
+  /* Blend dot grid pattern on top of a soft center-radial blue/white gradient */
+  background-image: 
+    radial-gradient(rgba(0, 98, 155, 0.09) 1.2px, transparent 1.2px),
+    radial-gradient(circle at 50% 35%, #D6E6F9 0%, #B8D4F7 55%, #96BEF2 100%);
+  background-size: 24px 24px, 100% 100%;
+  background-attachment: fixed;
   color: var(--text-primary);
   -webkit-font-smoothing: antialiased;
   min-height: 100vh;
@@ -31,43 +63,30 @@ body {
   overflow-x: hidden;
 }
 
-/* Background animated blobs for wow factor */
-body::before, body::after {
-  content: '';
-  position: absolute;
-  width: 500px;
-  height: 500px;
-  border-radius: 50%;
-  z-index: -1;
-  filter: blur(80px);
-  opacity: 0.5;
-  animation: float 20s ease-in-out infinite alternate;
-}
-
-body::before {
-  background: rgba(0, 98, 155, 0.2);
-  top: -100px;
-  left: -100px;
-}
-
-body::after {
-  background: rgba(0, 133, 209, 0.2);
-  bottom: -100px;
-  right: -100px;
-  animation-delay: -10s;
-}
-
-@keyframes float {
-  0% { transform: translate(0, 0) scale(1); }
-  50% { transform: translate(100px, 50px) scale(1.1); }
-  100% { transform: translate(-50px, 100px) scale(0.9); }
-}
-
 .fade-in {
-  animation: fadeIn 0.5s ease-out forwards;
+  animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
+  from { opacity: 0; transform: translateY(12px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
 }
