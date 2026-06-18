@@ -5,7 +5,7 @@ const api = axios.create({
 });
 
 export const certApi = {
-  sendOtp: (name, email) => api.post('/send-otp', { name, email }),
+  sendOtp: (name, email, sapId) => api.post('/send-otp', { name, email, sap_id: sapId }),
   generateCertificate: (email, otp, event_name, team_id) =>
     api.post('/generate-certificate', { email, otp, event_name, team_id }),
 };
