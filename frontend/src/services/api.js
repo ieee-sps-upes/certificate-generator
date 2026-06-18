@@ -1,7 +1,9 @@
 import axios from 'axios';
 
+export const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || '';
+
 const api = axios.create({
-  baseURL: '/api',  // Relative path — handled by reverse proxy in production, Vite proxy in dev
+  baseURL: import.meta.env.VITE_API_URL || '/api',
 });
 
 export const certApi = {

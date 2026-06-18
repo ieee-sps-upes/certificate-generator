@@ -266,14 +266,7 @@ def get_certificates(team_id):
 @app.route('/', methods=['GET'])
 def health_check():
     return jsonify({
-        "status": "Backend is running",
-        "endpoints": [
-            "/api/login - POST",
-            "/api/send-otp - POST",
-            "/api/generate-certificate - POST", 
-            "/api/certificates/<team_id> - GET",
-            "/api/download-certificate/<certificate_id> - GET"
-        ]
+        "status": "Backend is running"
     })
 
 if __name__ == '__main__':
