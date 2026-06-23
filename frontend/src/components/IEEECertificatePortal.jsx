@@ -12,26 +12,13 @@ const IEEECertificatePortal = () => {
   const [error, setError] = useState('');
   const [loadingMessage, setLoadingMessage] = useState('');
   const [downloadUrl, setDownloadUrl] = useState('');
-  const [connectionStatus, setConnectionStatus] = useState('connecting'); // 'connecting', 'slow', 'connected'
-
   // Wake up the backend as soon as the portal loads
   useEffect(() => {
     if (!BACKEND_URL) return;
 
-    // If it takes more than 1.5 seconds, show the connection banner
-    const timer = setTimeout(() => {
-      setConnectionStatus('slow');
-    }, 1500);
-
     axios.get(BACKEND_URL + '/')
-      .then(() => {
-        clearTimeout(timer);
-        setConnectionStatus('connected');
-      })
-      .catch(() => {
-        clearTimeout(timer);
-        setConnectionStatus('connected'); // Hide banner even if it fails, so they can try submitting
-      });
+      .then(() => {})
+      .catch(() => {});
   }, []);
   // After OTP is sent the backend returns the resolved email (from DB)
   const [resolvedEmail, setResolvedEmail] = useState('');
@@ -40,7 +27,7 @@ const IEEECertificatePortal = () => {
   // LinkedIn State
   const [showLinkedInPreview, setShowLinkedInPreview] = useState(false);
   const [linkedInText, setLinkedInText] = useState(
-    "I'm thrilled to share that I've successfully received my participation certificate from the IEEE Event! 🎓✨\n\n#IEEE #Achievement #ProfessionalDevelopment"
+    "I am pleased to share that I successfully participated in the IEEE SPS Day 2026, organized by the IEEE Signal Processing Society at UPES \nThe event provided a valuable opportunity to engage with fellow students, explore advancements in signal processing, and learn from professionals in the field who are focused on innovation and professional development.\nProud to have received this Certificate showing my participation in the event \n#IEEE #IEEESPS #SPSDay2026 #IEEEUPES #SignalProcessing #ProfessionalDevelopment #Learning #Innovation #StudentCommunity #Engineering #UPES"
   );
 
   const handleSendOtp = async (e) => {
@@ -49,24 +36,13 @@ const IEEECertificatePortal = () => {
     setError('');
     setLoadingMessage('');
 
-    // Progressive loading messages to improve UX during Render's cold start
-    const timeout1 = setTimeout(() => setLoadingMessage('Connecting to secure servers...'), 4000);
-    const timeout2 = setTimeout(() => setLoadingMessage('Establishing secure connection. This may take a moment...'), 12000);
-    const timeout3 = setTimeout(() => setLoadingMessage('Still working on it... Almost there!'), 25000);
-
     try {
       const res = await certApi.sendOtp(name, email, sapId);
-      clearTimeout(timeout1);
-      clearTimeout(timeout2);
-      clearTimeout(timeout3);
       // Backend returns the actual DB email + a masked hint for display
       setResolvedEmail(res.data.email);
       setEmailHint(res.data.email_hint || res.data.email);
       setStep(2);
     } catch (err) {
-      clearTimeout(timeout1);
-      clearTimeout(timeout2);
-      clearTimeout(timeout3);
       setError(err.response?.data?.error || 'Failed to send OTP. Please check your details.');
     } finally {
       setLoading(false);
@@ -131,29 +107,6 @@ const IEEECertificatePortal = () => {
               <line x1="12" y1="16" x2="12.01" y2="16"></line>
             </svg>
             {error}
-          </div>
-        )}
-
-        {connectionStatus === 'slow' && step === 1 && (
-          <div className="fade-in" style={{
-            backgroundColor: '#f0f7ff',
-            color: '#0056b3',
-            border: '1px solid #cce5ff',
-            padding: '12px 16px',
-            borderRadius: '8px',
-            marginBottom: '20px',
-            fontSize: '0.9rem',
-            display: 'flex',
-            alignItems: 'center',
-            lineHeight: '1.4'
-          }}>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '12px', flexShrink: 0 }}>
-              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
-            </svg>
-            <div>
-              <strong>Establishing secure connection...</strong><br/>
-              This initial setup may take 30-60 seconds. You can fill out your details in the meantime!
-            </div>
           </div>
         )}
 
